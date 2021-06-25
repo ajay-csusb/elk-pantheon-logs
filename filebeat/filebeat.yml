@@ -13,25 +13,37 @@
 # ============================== Filebeat inputs ===============================
 
 filebeat.inputs:
-
-# Each - is an input. Most options can be set at the input level, so
-# you can use different inputs for various configurations.
-# Below are the input specific configurations.
+- type: log
+  enabled: true 
+  paths:
+    #- /home/ajay/tools/logstash-7.13.2/logstash-tutorial.log
+    - /home/ajay/workspace/python/pantheon-logs/app_server_logs_*/nginx/nginx-access.log
+  tags: ["ngnix-access"]
 
 - type: log
-
-  # Change to true to enable this input configuration.
   enabled: true 
-
-  # Paths that should be crawled and fetched. Glob based paths.
   paths:
-    - {WORKING_DIR}/pantheon-logs/app_server_logs_*/nginx/nginx-access.log
-    - {WORKING_DIR}/pantheon-logs/app_server_logs_*/nginx/nginx-error.log
-    - {WORKING_DIR}/pantheon-logs/app_server_logs_*/php/php-error.log
-    - {WORKING_DIR}/pantheon-logs/app_server_logs_*/php/php-fpm-error.log
-    - {WORKING_DIR}/pantheon-logs/app_server_logs_*/php/php-slow.log
-    #- /var/log/*.log
-    #- c:\programdata\elasticsearch\logs\*
+    - ${WORKING_DIR:?Cannot read env variable}/pantheon-logs/app_server_logs_*/nginx/nginx-error.log
+  tags: ["ngnix-error"]
+
+- type: log
+  enabled: true 
+  paths:
+    - ${WORKING_DIR}/pantheon-logs/app_server_logs_*/php/php-error.log
+  tags: ["php-error"]
+
+- type: log
+  enabled: true 
+  paths:
+    - ${WORKING_DIR}/pantheon-logs/app_server_logs_*/php/php-fpm-error.log
+  tags: ["php-fpm-error"]
+
+- type: log
+  enabled: true 
+  paths:
+    - ${WORKING_DIR}/pantheon-logs/app_server_logs_*/php/php-slow.log
+  tags: ["php-slow"]
+
 
   # Exclude lines. A list of regular expressions to match. It drops the lines that are
   # matching any regular expression from the list.
@@ -103,10 +115,10 @@ filebeat.config.modules:
   path: ${path.config}/modules.d/*.yml
 
   # Set to true to enable config reloading
-  reload.enabled: false
+  reload.enabled: true 
 
   # Period on which files under path should be checked for changes
-  #reload.period: 10s
+  reload.period: 10s
 
 # ======================= Elasticsearch template setting =======================
 
@@ -153,7 +165,7 @@ setup.kibana:
   # Scheme and port can be left out and will be set to the default (http and 5601)
   # In case you specify and additional path, the scheme is required: http://localhost:5601/path
   # IPv6 addresses should always be defined as: https://[2001:db8::1]:5601
-  host: {KIBANA_URL}
+  host: ${KIBANA_URL}
 
   # Kibana Space ID
   # ID of the Kibana Space into which the dashboards should be loaded. By default,
@@ -167,33 +179,33 @@ setup.kibana:
 # The cloud.id setting overwrites the `output.elasticsearch.hosts` and
 # `setup.kibana.host` options.
 # You can find the `cloud.id` in the Elastic Cloud web UI.
-  cloud.id: {CLOUD_ID}
+  #cloud.id: {CLOUD_ID}
 
 # The cloud.auth setting overwrites the `output.elasticsearch.username` and
 # `output.elasticsearch.password` settings. The format is `<user>:<pass>`.
-  cloud.auth: "filebeat_setup: "{CLOUD_PASSWORD}
+  #cloud.auth: "filebeat_setup: "{CLOUD_PASSWORD}
 
 # ================================== Outputs ===================================
 
 # Configure what output to use when sending the data collected by the beat.
 
 # ---------------------------- Elasticsearch Output ----------------------------
-output.elasticsearch:
+#output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: [{ELASTICSEARCH_ENDPOINT}]
+  #hosts: [{ELASTICSEARCH_ENDPOINT}]
 
   # Protocol - either `http` (default) or `https`.
   #protocol: "https"
 
   # Authentication credentials - either API key or username/password.
   #api_key: "id:api_key"
-  username: "filebeat_writer"
-  password: {CLOUD_PASSWORD}
+  #username: "filebeat_writer"
+  #password: {CLOUD_PASSWORD}
 
 # ------------------------------ Logstash Output -------------------------------
-#output.logstash:
+output.logstash:
   # The Logstash hosts
-  #hosts: ["localhost:5044"]
+  hosts: ["localhost:5044"]
 
   # Optional SSL. By default is off.
   # List of root certificates for HTTPS server verifications
